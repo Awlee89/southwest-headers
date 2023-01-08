@@ -13,6 +13,7 @@ from pathlib import Path
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import boto3
 
 confirmation_number = ''.join(random.choices(string.ascii_uppercase, k=6))
 first_name = ''.join(random.choices(string.ascii_lowercase, k=random.randrange(4,10))).capitalize()
@@ -50,5 +51,15 @@ for key in headers:
 # save headers
 with open(output_file, "w") as json_file:
     json.dump(southwest_headers, json_file)
+
+
+# Create a Secrets Manager client
+session = boto3.session.Session()
+client = session.client(service_name="secretsmanager", region_name="us-west-1")
+
+response = client.put_secret_value(
+    SecretId="sw-headers",
+    SecretString=json.dumps(southwest_headers)
+)
 
 driver.quit()
